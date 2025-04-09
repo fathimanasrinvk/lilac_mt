@@ -4,7 +4,7 @@ import '../../../core/constants/colors.dart';
 import '../../../core/utils/app_utils.dart';
 import '../../../repository/api/chat_details_screen/model/chat_details_screen_model.dart';
 import '../../../repository/api/chat_details_screen/service/chat_details_screen_service.dart';
-class ChatController with ChangeNotifier {
+class ChatDetailController with ChangeNotifier {
   bool isLoading = false;
   List<ChatModel> chatList = [];
 
@@ -13,7 +13,7 @@ class ChatController with ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await ChatService.getChats();
+      final response = await ChatDetailsService.getChats();
 
       if (response != null) {
         chatList = response;

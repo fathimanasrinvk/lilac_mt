@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
             ChangeNotifierProvider(
               create: (context) => MessageListController(),
             ) ,ChangeNotifierProvider(
-              create: (context) => ChatController(),
+              create: (context) => ChatDetailController(),
             )
           ],
           child: MaterialApp(

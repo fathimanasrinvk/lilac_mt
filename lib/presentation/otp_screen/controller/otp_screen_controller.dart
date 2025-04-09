@@ -78,7 +78,7 @@ class VerificationController with ChangeNotifier {
         // Navigate to messages screen
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const MessagesScreen()),
+          MaterialPageRoute(builder: (context) => const MessagesListScreen()),
               (route) => false,
         );
       } else {

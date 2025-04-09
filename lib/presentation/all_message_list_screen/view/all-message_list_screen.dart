@@ -5,14 +5,14 @@ import '../../../repository/api/all_message_list_screen/model/all_message_list_s
 import '../../chat_details_screen/view/chat_details_screen.dart';
 import '../controller/all_message_list_controller.dart';
 
-class MessagesScreen extends StatefulWidget {
-  const MessagesScreen({super.key});
+class MessagesListScreen extends StatefulWidget {
+  const MessagesListScreen({super.key});
 
   @override
-  State<MessagesScreen> createState() => _MessagesScreenState();
+  State<MessagesListScreen> createState() => _MessagesListScreenState();
 }
 
-class _MessagesScreenState extends State<MessagesScreen> {
+class _MessagesListScreenState extends State<MessagesListScreen> {
   @override
   void initState() {
     super.initState();
@@ -162,7 +162,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ChatScreen(
+            builder: (context) => ChatDetailsScreen(
               name: message.attributes?.name ?? "",
               active: message.attributes?.isOnline ?? false,
                 profilepic: message.attributes?.profilePhotoUrl ?? "",

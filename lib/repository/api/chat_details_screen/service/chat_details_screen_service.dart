@@ -6,7 +6,7 @@ import '../../../helper/api_helper.dart';
 import '../model/chat_details_screen_model.dart';
 
 
-class ChatService {
+class ChatDetailsService {
   static Future<List<ChatModel>?> getChats() async {
     try {
       final rawResponse = await ApiHelper.getData(

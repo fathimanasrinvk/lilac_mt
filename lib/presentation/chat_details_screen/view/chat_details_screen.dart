@@ -5,18 +5,18 @@ import 'package:provider/provider.dart';
 import '../../../repository/api/chat_details_screen/model/chat_details_screen_model.dart';
 import '../controller/chat_details-screen_controller.dart';
 
-class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key, required this.name, required this.active,  required this.profilepic,
+class ChatDetailsScreen extends StatefulWidget {
+  const ChatDetailsScreen({super.key, required this.name, required this.active,  required this.profilepic,
   });
   final String name;
   final bool active;
   final dynamic profilepic;
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  State<ChatDetailsScreen> createState() => _ChatDetailsScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final int currentUserId = 55;
@@ -25,7 +25,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<ChatController>(context, listen: false).fetchChats(context);
+      Provider.of<ChatDetailController>(context, listen: false).fetchChats(context);
     });
   }
 
@@ -148,7 +148,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildMessagesList() {
     return Expanded(
-      child: Consumer<ChatController>(
+      child: Consumer<ChatDetailController>(
         builder: (context, controller, _) {
           if (controller.isLoading) {
             return const Center(child: CircularProgressIndicator());
