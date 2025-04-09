@@ -17,6 +17,7 @@ class VerificationScreen extends StatelessWidget {
     final controller = Provider.of<VerificationController>(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w),

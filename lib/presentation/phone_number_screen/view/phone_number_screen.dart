@@ -15,6 +15,7 @@ class PhoneNumberScreen extends StatelessWidget {
     final controller = Provider.of<PhoneNumberController>(context, listen: false);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -85,7 +86,7 @@ class PhoneNumberScreen extends StatelessWidget {
                         ),
                         decoration: InputDecoration(
                           border: InputBorder.none,
-                          hintText: '9745681203',
+                          hintText: '+919745681203',
                           hintStyle: GLTextStyles.poppinsStyle(
                             size: 14.sp,
                             color: Colors.grey,
