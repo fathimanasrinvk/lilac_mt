@@ -1,401 +1,278 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../core/constants/colors.dart';
-import '../../../core/constants/textstyles.dart';
+import 'package:lilac_infotech/core/constants/colors.dart';
+import 'package:provider/provider.dart';
+import '../../../repository/api/chat_details_screen/model/chat_details_screen_model.dart';
+import '../controller/chat_details-screen_controller.dart';
 
-
-class ChatDetailScreen extends StatefulWidget {
-  const ChatDetailScreen({Key? key}) : super(key: key);
+class ChatScreen extends StatefulWidget {
+  const ChatScreen({super.key, required this.name, required this.active,  required this.profilepic,
+  });
+  final String name;
+  final bool active;
+  final dynamic profilepic;
 
   @override
-  State<ChatDetailScreen> createState() => _ChatDetailScreenState();
+  State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatDetailScreenState extends State<ChatDetailScreen> {
-  final TextEditingController _messageController = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
-  final List<Message> _messages = [
-    Message(
-      text: "Happy Birthday",
-      isMe: false,
-      time: "10:00 AM",
-      hasAttachment: true,
-    ),
-  ];
+class _ChatScreenState extends State<ChatScreen> {
+  final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final int currentUserId = 55;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ChatController>(context, listen: false).fetchChats(context);
+    });
+  }
 
   @override
   void dispose() {
-    _messageController.dispose();
-    _focusNode.dispose();
+    _controller.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
-  void _sendMessage() {
-    if (_messageController.text.trim().isNotEmpty) {
-      setState(() {
-        _messages.add(
-          Message(
-            text: _messageController.text,
-            isMe: true,
-            time: _getCurrentTime(),
-            hasAttachment: false,
-          ),
-        );
-        _messageController.clear();
-      });
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
-  String _getCurrentTime() {
-    final now = DateTime.now();
-    String period = now.hour >= 12 ? 'PM' : 'AM';
-    int hour = now.hour > 12 ? now.hour - 12 : now.hour;
-    if (hour == 0) hour = 12;
-    String minute = now.minute.toString().padLeft(2, '0');
-    return '$hour:$minute $period';
+  void _sendMessage() {
+    final message = _controller.text.trim();
+    if (message.isNotEmpty) {
+      _controller.clear();
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
+      appBar: _buildAppBar(),
+      body: Column(
+        children: [
+          _buildDayTag(),
+          _buildMessagesList(),
+          _buildMessageInput(),
+        ],
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return PreferredSize(
+      preferredSize: Size.fromHeight(80.h),
+      child: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        forceMaterialTransparency: true,
+        elevation: 0,
+        title: Row(
           children: [
-            // Chat header
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                border: Border(
-                  bottom: BorderSide(
-                    color: Colors.grey[200]!,
-                    width: 1,
+            IconButton(
+              icon:  Icon(Icons.arrow_back_ios_new, color:ColorTheme.black),
+              onPressed: () => Navigator.pop(context),
+            ),
+            CircleAvatar(
+              radius: 20.r,
+              backgroundImage: widget.profilepic.isNotEmpty
+                  ? NetworkImage(widget.profilepic)
+                  : const Icon(Icons.person) as ImageProvider,
+            ),
+            SizedBox(width: 10.w),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.name,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.sp,
                   ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Icon(Icons.arrow_back, size: 24.h),
-                  ),
-                  SizedBox(width: 12.w),
-                  Container(
-                    width: 36.w,
-                    height: 36.h,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: AssetImage('assets/images/avatar2.png'),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Regina Bearden',
-                        style: GLTextStyles.poppinsStyle(
-                          size: 14.sp,
-                          weight: FontWeight.w600,
-                          color: ColorTheme.black,
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Container(
-                            width: 8.w,
-                            height: 8.h,
-                            decoration: BoxDecoration(
-                              color: Colors.green,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          SizedBox(width: 4.w),
-                          Text(
-                            'Online',
-                            style: GLTextStyles.poppinsStyle(
-                              size: 12.sp,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            // Chat messages
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: ListView.builder(
-                  reverse: true,
-                  itemCount: _messages.length + 1, // +1 for the date header
-                  itemBuilder: (context, index) {
-                    if (index == _messages.length) {
-                      // Date header at the top (when reversed)
-                      return Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16.h),
-                        child: Center(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 12.w,
-                              vertical: 4.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            child: Text(
-                              'Today',
-                              style: GLTextStyles.poppinsStyle(
-                                size: 12.sp,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    // Messages (in reverse order)
-                    final message = _messages[_messages.length - 1 - index];
-
-                    if (message.isMe) {
-                      return _buildSentMessage(
-                        message.text,
-                        message.time,
-                      );
-                    } else {
-                      return _buildReceivedMessage(
-                        message.text,
-                        message.time,
-                        message.hasAttachment,
-                      );
-                    }
-                  },
-                ),
-              ),
-            ),
-            // Message input
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  top: BorderSide(
-                    color: Colors.grey[200]!,
-                    width: 1,
-                  ),
-                ),
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.grey[400],
-                      size: 20,
-                    ),
-                  ),
-                  Container(
-                    height: 36.h,
-                    width: 1,
-                    color: Colors.grey[300],
-                  ),
-                  // Text input area
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w),
-                      child: TextField(
-                        controller: _messageController,
-                        focusNode: _focusNode,
-                        decoration: InputDecoration(
-                          hintText: 'Type a message...',
-                          hintStyle: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 14.sp,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(vertical: 10.h),
-                        ),
-                        style: GLTextStyles.poppinsStyle(
-                          size: 14.sp,
-                          color: ColorTheme.black,
-                        ),
-                        onSubmitted: (_) => _sendMessage(),
-                      ),
-                    ),
-                  ),
-                  // Button row - emoticons, attachments, etc.
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () {},
-                        icon: Text(
-                          'GIF',
-                          style: GLTextStyles.poppinsStyle(
-                            size: 14.sp,
-                            weight: FontWeight.w600,
-                            color: Colors.grey[400],
-                          ),
-                        ),
-                        iconSize: 20,
-                        padding: EdgeInsets.all(4),
-                        constraints: BoxConstraints(),
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(
-                          Icons.photo_library_outlined,
-                          color: Colors.grey[400],
-                        ),
-                        iconSize: 20,
-                        padding: EdgeInsets.all(4),
-                        constraints: BoxConstraints(),
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(
-                          Icons.emoji_emotions_outlined,
-                          color: Colors.grey[400],
-                        ),
-                        iconSize: 20,
-                        padding: EdgeInsets.all(4),
-                        constraints: BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                  // Send button
-                  GestureDetector(
-                    onTap: _sendMessage,
-                    child: Container(
-                      width: 36.w,
-                      height: 36.h,
-                      decoration: BoxDecoration(
-                        color: Colors.pink[400],
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: _messageController.text.isEmpty
-                            ? Icon(
-                          Icons.mic,
-                          color: Colors.white,
-                          size: 20,
-                        )
-                            : Icon(
-                          Icons.send,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                _buildOnlineStatus(),
+              ],
+            )
           ],
         ),
       ),
     );
   }
 
-  Widget _buildReceivedMessage(String message, String time, bool hasAttachment) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 16.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Container(
-            constraints: BoxConstraints(maxWidth: 260.w),
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16.r),
-                topRight: Radius.circular(16.r),
-                bottomRight: Radius.circular(16.r),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Text(
-                    message,
-                    style: GLTextStyles.poppinsStyle(
-                      size: 14.sp,
-                      color: ColorTheme.black,
-                    ),
-                  ),
-                ),
-                if (hasAttachment) ...[
-                  SizedBox(width: 8.w),
-                  Icon(
-                    Icons.play_arrow,
-                    color: Colors.red,
-                    size: 20,
-                  ),
-                ],
-              ],
-            ),
+  Widget _buildOnlineStatus() {
+    return Row(
+      children: [
+        Text(
+          widget.active ? "Online" : "Offline",
+          style: TextStyle(
+            color: widget.active ? Colors.green : Colors.grey,
+            fontSize: 12.sp,
           ),
-        ],
+        ),
+        SizedBox(width: 4.w),
+        Icon(
+          Icons.circle,
+          size: 6,
+          color: widget.active ? Colors.green : Colors.grey,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDayTag() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 12.h),
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          child: Text("Today", style: TextStyle(fontSize: 12.sp)),
+        ),
       ),
     );
   }
 
-  Widget _buildSentMessage(String message, String time) {
+  Widget _buildMessagesList() {
+    return Expanded(
+      child: Consumer<ChatController>(
+        builder: (context, controller, _) {
+          if (controller.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (controller.chatList.isEmpty) {
+            return const Center(child: Text("No messages yet"));
+          }
+
+          WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+
+          return ListView.builder(
+            controller: _scrollController,
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            itemCount: controller.chatList.length,
+            itemBuilder: (context, index) {
+              final message = controller.chatList[index];
+              final isSentByMe = message.attributes?.senderId == currentUserId;
+              return _buildMessageBubble(message, isSentByMe);
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildMessageBubble(ChatModel message, bool isSentByMe) {
+    final messageText = message.attributes?.message ?? '';
+    final formattedTime = _formatMessageTime(message.attributes?.sentAt);
+
     return Padding(
-      padding: EdgeInsets.only(bottom: 16.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+      padding: EdgeInsets.only(
+        left: isSentByMe ? 80.w : 16.w,
+        right: isSentByMe ? 16.w : 80.w,
+        bottom: 12.h,
+      ),
+      child: Column(
+        crossAxisAlignment: isSentByMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Container(
-            constraints: BoxConstraints(maxWidth: 260.w),
+            constraints: BoxConstraints(maxWidth: 250.w),
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
             decoration: BoxDecoration(
-              color: ColorTheme.mainColor,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16.r),
-                topRight: Radius.circular(16.r),
-                bottomLeft: Radius.circular(16.r),
-              ),
+              color: isSentByMe ? const Color(0xFFFF4D67) : Colors.grey.shade200,
+              borderRadius: _getMessageBorderRadius(isSentByMe),
             ),
             child: Text(
-              message,
-              style: GLTextStyles.poppinsStyle(
-                size: 14.sp,
-                color: ColorTheme.white,
+              messageText,
+              style: TextStyle(
+                color: isSentByMe ? Colors.white : Colors.black,
+                fontSize: 14.sp,
               ),
             ),
           ),
+          SizedBox(height: 4.h),
+          _buildMessageTimeRow(formattedTime, isSentByMe),
         ],
       ),
     );
   }
-}
 
-// Message model for chat
-class Message {
-  final String text;
-  final bool isMe;
-  final String time;
-  final bool hasAttachment;
+  BorderRadius _getMessageBorderRadius(bool isSentByMe) {
+    return isSentByMe
+        ? BorderRadius.only(
+      topLeft: Radius.circular(12.r),
+      topRight: Radius.circular(12.r),
+      bottomLeft: Radius.circular(12.r),
+    )
+        : BorderRadius.only(
+      topLeft: Radius.circular(12.r),
+      topRight: Radius.circular(12.r),
+      bottomRight: Radius.circular(12.r),
+    );
+  }
 
-  Message({
-    required this.text,
-    required this.isMe,
-    required this.time,
-    this.hasAttachment = false,
-  });
+  Widget _buildMessageTimeRow(String time, bool isSentByMe) {
+    return Row(
+      mainAxisAlignment: isSentByMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: [
+        Text(
+          time,
+          style: TextStyle(fontSize: 11.sp, color: Colors.grey),
+        ),
+        if (isSentByMe) SizedBox(width: 3.w),
+        if (isSentByMe)
+          Icon(Icons.done_all, size: 11.sp, color: Colors.grey),
+      ],
+    );
+  }
+
+  String _formatMessageTime(DateTime? messageTime) {
+    if (messageTime == null) return '';
+    final hour = messageTime.hour.toString().padLeft(2, '0');
+    final minute = messageTime.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  Widget _buildMessageInput() {
+    return Padding(
+      padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 20.h),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(25.r),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                decoration: const InputDecoration(
+                  hintText: "Type a message...",
+                  border: InputBorder.none,
+                ),
+                onSubmitted: (_) => _sendMessage(),
+              ),
+            ),
+            IconButton(
+              onPressed: _sendMessage,
+              icon: const Icon(Icons.send, color: Colors.pink),
+            )
+          ],
+        ),
+      ),
+    );
+  }
 }

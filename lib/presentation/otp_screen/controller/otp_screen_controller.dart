@@ -8,7 +8,7 @@ import '../../../app_config/app_config.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/utils/app_utils.dart';
 import '../../../repository/api/otp_verify_screen/service/otp_verify_screen_service.dart';
-import '../../chat_screen/view/chat_screen.dart';
+import '../../all_message_list_screen/view/all-message_list_screen.dart';
 
 
 class VerificationController with ChangeNotifier {
@@ -76,11 +76,11 @@ class VerificationController with ChangeNotifier {
         storeUserData(response["data"]);
 
         // Navigate to messages screen
-        // Navigator.pushAndRemoveUntil(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => const MessagesScreen()),
-        //       (route) => false,
-        // );
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const MessagesScreen()),
+              (route) => false,
+        );
       } else {
         Flushbar(
           maxWidth: .55.sw,

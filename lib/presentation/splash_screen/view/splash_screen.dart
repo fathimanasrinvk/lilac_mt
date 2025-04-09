@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lilac_infotech/presentation/phone_number_screen/view/phone_number_screen.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/textstyles.dart';
 
@@ -103,7 +104,9 @@ class SplashScreen extends StatelessWidget {
                 SizedBox(height: 15.h),
                 // Phone Number Sign In Button
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=>PhoneNumberScreen()));
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColorTheme.mainColor,
                     minimumSize: Size(double.infinity, 50.h),

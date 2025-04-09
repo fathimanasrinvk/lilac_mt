@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:lilac_infotech/presentation/chat_details_screen/view/chat_details_screen.dart';
-import 'package:lilac_infotech/presentation/chat_screen/controller/chat-screen-controller.dart';
-import 'package:lilac_infotech/presentation/chat_screen/view/chat_screen.dart';
+import 'package:lilac_infotech/presentation/all_message_list_screen/controller/all_message_list_controller.dart';
+import 'package:lilac_infotech/presentation/chat_details_screen/controller/chat_details-screen_controller.dart';
 import 'package:lilac_infotech/presentation/otp_screen/controller/otp_screen_controller.dart';
-import 'package:lilac_infotech/presentation/otp_screen/view/otp-screen.dart';
 import 'package:lilac_infotech/presentation/phone_number_screen/controller/phone_number_screen_controller.dart';
 import 'package:lilac_infotech/presentation/phone_number_screen/view/phone_number_screen.dart';
+import 'package:lilac_infotech/presentation/splash_screen/view/splash_screen.dart';
 import 'package:provider/provider.dart';
 void main() async {
   runApp(
        MyApp(),
-
   );
 }
 
@@ -28,15 +26,16 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return MultiProvider(
           providers: [
-            // ChangeNotifierProvider(create: (_) => PhoneNumberProvider()),
-            // In your main.dart or wherever you set up providers
+
             ChangeNotifierProvider(
               create: (context) => PhoneNumberController(),
             ) , ChangeNotifierProvider(
               create: (context) => VerificationController(),
             ),
             ChangeNotifierProvider(
-              create: (context) => MessagesController(),
+              create: (context) => MessageListController(),
+            ) ,ChangeNotifierProvider(
+              create: (context) => ChatController(),
             )
           ],
           child: MaterialApp(
@@ -52,7 +51,7 @@ class MyApp extends StatelessWidget {
                 iconTheme: IconThemeData(color: Colors.black),
               ),
             ),
-            home:  PhoneNumberScreen(),
+            home:  SplashScreen(),
 
           ),
         );
